@@ -1,0 +1,21 @@
+# Python virtual environment
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Data files (WELFake dataset is ~245MB, should never be committed)
+data/
+*.csv
+*.tsv
+WELFake_Dataset.csv
+
+# Temporary files & notebooks scratch
+scratch/
+nb_summary.txt
+dump_nb.py
+
+# Model artifacts if large
+backend/model/*.joblib
+backend/model/*.pt
+backend/model/*.bin

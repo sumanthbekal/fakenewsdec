@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI-powered Fake News Detector trained on the WELFake Dataset using TF-IDF and Linear Support Vector Classifier (LinearSVC). Analyzes linguistic patterns in news articles.">
+  <title>Veritas AI — Fake News Detector & Linguistic Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="badge">
+        <span class="badge-dot"></span>
+        WELFake Model • TF-IDF + LinearSVC
+      </div>
+      <h1>Veritas Fake News Detector</h1>
+      <p class="subtitle">
+        Evaluate news headlines and article text using machine learning trained on over 63,000 verified news items to detect deceptive linguistic patterns.
+      </p>
+    </header>
+
+    <!-- Main Card -->
+    <main class="card">
+      <!-- Example buttons -->
+      <section class="examples-section">
+        <div class="examples-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          Try Sample Articles:
+        </div>
+        <div class="examples-grid">
+          <button type="button" class="btn-example" id="btn-sample-real-1" data-sample="real1">
+            <span class="example-tag tag-real">Example 1 • Real-style</span>
+            <span>City Council Approves Road Budget</span>
+          </button>
+          <button type="button" class="btn-example" id="btn-sample-real-2" data-sample="real2">
+            <span class="example-tag tag-real">Example 2 • Real-style</span>
+            <span>University Merit Scholarships</span>
+          </button>
+          <button type="button" class="btn-example" id="btn-sample-fake-1" data-sample="fake1">
+            <span class="example-tag tag-fake">Example 3 • Fake-style</span>
+            <span>Sensational Secret Cancer Cure</span>
+          </button>
+          <button type="button" class="btn-example" id="btn-sample-fake-2" data-sample="fake2">
+            <span class="example-tag tag-fake">Example 4 • Fake-style</span>
+            <span>Insider Claims Banks Shutting Down</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Input area -->
+      <section>
+        <div class="input-header">
+          <label for="article-input" class="input-label">Article Text or News Story</label>
+          <span class="word-count-badge" id="word-count-badge">
+            <span id="word-count">0</span> words (min. 10 words)
+          </span>
+        </div>
+        <textarea 
+          id="article-input" 
+          placeholder="Paste or write the full news article or headline here... For accurate results, provide at least 10 words."
+        ></textarea>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button type="button" class="btn btn-primary" id="btn-analyze">
+            <span class="spinner" id="btn-spinner" style="display: none;"></span>
+            <span id="btn-text">Analyze Article</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btn-clear">
+            Clear Input
+          </button>
+        </div>
+
+        <!-- Error display -->
+        <div class="alert" id="error-alert" style="display: none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span id="error-message"></span>
+        </div>
+      </section>
+
+      <!-- Results Card (Hidden by default) -->
+      <section class="card result-card" id="result-card" style="display: none;">
+        <div class="result-header">
+          <div class="result-tag" id="result-tag">
+            <!-- Populated via JS -->
+          </div>
+          <div class="meta-stats">
+            <div class="meta-stat-item">
+              <span class="stat-label">Model Confidence</span>
+              <span class="stat-value" id="stat-confidence">--</span>
+            </div>
+            <div class="meta-stat-item">
+              <span class="stat-label">Word Count</span>
+              <span class="stat-value" id="stat-words">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Probabilities -->
+        <div class="probability-section">
+          <div class="prob-row">
+            <div class="prob-label-row">
+              <span style="color: var(--fake-red);">Probability FAKE:</span>
+              <span id="prob-fake-text">0%</span>
+            </div>
+            <div class="bar-container">
+              <div class="bar-fill fake" id="bar-fake" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="prob-row">
+            <div class="prob-label-row">
+              <span style="color: var(--real-green);">Probability REAL:</span>
+              <span id="prob-real-text">0%</span>
+            </div>
+            <div class="bar-container">
+              <div class="bar-fill real" id="bar-real" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Disclaimer section (Mandatory requirement) -->
+      <div class="disclaimer-card" id="disclaimer-container">
+        <div class="disclaimer-icon">⚠️</div>
+        <div>
+          <strong>Important Model Disclaimer:</strong>
+          This is a statistical estimate from a model trained on the WELFake dataset only. It checks writing patterns, not facts, and can be wrong on news from other sources. Verify important claims with trusted sources.
+        </div>
+      </div>
+    </main>
+
+    <!-- Model Performance & Evaluation Metrics -->
+    <section class="metrics-card">
+      <div class="metrics-title">
+        <span>Model Evaluation on WELFake Test Benchmark</span>
+        <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: normal;">N = 5,000 articles</span>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-box">
+          <div class="metric-num" id="metric-accuracy">96.0%</div>
+          <div class="metric-desc">Accuracy</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-num" id="metric-f1">96.4%</div>
+          <div class="metric-desc">F1-Score</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-num" id="metric-auc">0.993</div>
+          <div class="metric-desc">ROC-AUC</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-num" id="metric-precision">96.3%</div>
+          <div class="metric-desc">Precision</div>
+        </div>
+      </div>
+
+      <div class="eval-plot-container">
+        <img src="/static/figs/evaluation_metrics.png" alt="Confusion Matrix and ROC Curve Plot" id="eval-metrics-plot">
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>WELFake Detection System • Natural Language Processing & Machine Learning</p>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
